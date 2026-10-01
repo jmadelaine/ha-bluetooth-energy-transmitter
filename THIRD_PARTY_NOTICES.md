@@ -30,3 +30,16 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## B.E.T. image
+
+`images/bet.webp` shows the B.E.T. (Broadcast Energy Transmitter) as it appears
+in the animated series *G.I. Joe: A Real American Hero* (1983–1986). It is a
+re-compressed copy of
+[File:Bet.png](https://gijoe.fandom.com/wiki/File:Bet.png) from the G.I. Joe
+Wiki, where it is marked as fair use, not as Creative Commons content.
+
+G.I. Joe and B.E.T. are trademarks of Hasbro. The image is copyright its
+respective owners, is used here only to illustrate the project's name, and is
+not covered by this repository's MIT License. This project is not affiliated
+with or endorsed by Hasbro.

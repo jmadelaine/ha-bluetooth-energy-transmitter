@@ -2,9 +2,11 @@
 
 <p align="center">
   <img src="images/bet.webp" alt="The B.E.T., a white armored vehicle with a satellite dish and a raised solar panel array, labeled B.E.T. on its side" width="420">
+  <br>
+  <sub>The B.E.T. from <i>G.I. Joe: A Real American Hero</i> (1983–1986 animated series), via the <a href="https://gijoe.fandom.com/wiki/File:Bet.png">G.I. Joe Wiki</a>. G.I. Joe and B.E.T. are trademarks of Hasbro; the image is copyright its respective owners and is not covered by this repository's license.</sub>
 </p>
 
-Named after the B.E.T. (Broadcast Energy Transmitter) from G.I. Joe.
+Named after the B.E.T. (Broadcast Energy Transmitter) from G.I. Joe. This project isn't affiliated with or endorsed by Hasbro.
 
 Broadcast arbitrary BLE advertisements from your Home Assistant host's Bluetooth adapter. Use it to wake or toggle devices that react to a fixed advertisement, such as a remote's power button, without a device-specific integration for each one.
 
@@ -154,7 +156,7 @@ Thanks to [Xgimi-4-Home-Assistant](https://github.com/manymuch/Xgimi-4-Home-Assi
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+The code is MIT licensed; see [LICENSE](LICENSE). The B.E.T. image isn't covered by that license; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Development
 
