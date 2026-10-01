@@ -1,0 +1,88 @@
+send:
+  fields:
+    manufacturer_id:
+      example: "0x0046"
+      selector:
+        text:
+    payload:
+      example: "0a1b2c3d"
+      selector:
+        text:
+    local_name:
+      example: "Bluetooth 4.0 RC"
+      selector:
+        text:
+    service_uuids:
+      example: '["1812"]'
+      selector:
+        text:
+          multiple: true
+    appearance:
+      example: 961
+      selector:
+        number:
+          min: 0
+          max: 65535
+          mode: box
+    advertisement_type:
+      default: peripheral
+      selector:
+        select:
+          options:
+            - peripheral
+            - broadcast
+          translation_key: advertisement_type
+    duration:
+      default: 4
+      selector:
+        number:
+          min: 1
+          max: 10
+          step: 0.5
+          unit_of_measurement: s
+    adapter:
+      example: hci0
+      selector:
+        text:
+    advanced_options:
+      collapsed: true
+      fields:
+        service_data:
+          example: '{"fe95": "3020bc03"}'
+          selector:
+            object:
+        solicit_uuids:
+          selector:
+            text:
+              multiple: true
+        include_tx_power:
+          selector:
+            boolean:
+        tx_power:
+          selector:
+            number:
+              min: -127
+              max: 20
+              unit_of_measurement: dBm
+              mode: box
+        discoverable:
+          selector:
+            boolean:
+        min_interval:
+          selector:
+            number:
+              min: 20
+              max: 10240
+              unit_of_measurement: ms
+              mode: box
+        max_interval:
+          selector:
+            number:
+              min: 20
+              max: 10240
+              unit_of_measurement: ms
+              mode: box
+        data:
+          example: '{"0x16": "0d18ff"}'
+          selector:
+            object:

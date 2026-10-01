@@ -1,0 +1,14 @@
+{
+  "entity": {
+    "button": {
+      "signal": {
+        "default": "mdi:bluetooth-transfer"
+      }
+    }
+  },
+  "services": {
+    "send": {
+      "service": "mdi:bluetooth-transfer"
+    }
+  }
+}

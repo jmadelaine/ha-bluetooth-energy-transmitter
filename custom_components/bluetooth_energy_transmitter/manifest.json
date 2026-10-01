@@ -1,0 +1,14 @@
+{
+  "domain": "bluetooth_energy_transmitter",
+  "name": "Bluetooth Energy Transmitter",
+  "after_dependencies": ["bluetooth"],
+  "codeowners": ["@jmadelaine"],
+  "config_flow": true,
+  "documentation": "https://github.com/jmadelaine/ha-bluetooth-energy-transmitter",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/jmadelaine/ha-bluetooth-energy-transmitter/issues",
+  "requirements": ["dbus-fast>=2.21.1"],
+  "single_config_entry": true,
+  "version": "0.1.0"
+}

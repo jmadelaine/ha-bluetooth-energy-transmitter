@@ -1,0 +1,311 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Broadcast BLE advertisements from this host's Bluetooth adapter. After setup, add a signal for each advertisement you want as a button.",
+        "data": {
+          "adapter": "Default adapter"
+        },
+        "data_description": {
+          "adapter": "Adapter used when a signal or action doesn't name one. Automatic picks the first powered adapter with a free advertising slot."
+        }
+      }
+    },
+    "abort": {
+      "already_configured": "Bluetooth Energy Transmitter is already set up.",
+      "single_instance_allowed": "Bluetooth Energy Transmitter is already set up.",
+      "no_adapters": "No Bluetooth adapter that supports BLE advertising was found through BlueZ on the system D-Bus."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "adapter": "Default adapter"
+        },
+        "data_description": {
+          "adapter": "Adapter used when a signal or action doesn't name one. Automatic picks the first powered adapter with a free advertising slot."
+        }
+      }
+    }
+  },
+  "config_subentries": {
+    "signal": {
+      "entry_type": "Signal",
+      "initiate_flow": {
+        "user": "Add signal"
+      },
+      "step": {
+        "user": {
+          "title": "Add signal",
+          "description": "Paste an advertisement copied from the Advertisement Monitor, or enter its fields yourself.",
+          "menu_options": {
+            "paste": "Paste from the Advertisement Monitor",
+            "manual": "Enter fields manually"
+          }
+        },
+        "paste": {
+          "title": "Paste advertisement",
+          "description": "In Settings → Devices & services → Bluetooth → Advertisement Monitor, select the device's advertisement and choose Copy to clipboard, then paste it here. You can also paste a raw packet as hex. You can review every field on the next step.",
+          "data": {
+            "advertisement": "Advertisement"
+          },
+          "data_description": {
+            "advertisement": "The copied JSON, or raw advertising data as hex."
+          }
+        },
+        "manual": {
+          "title": "Add signal",
+          "description": "Define an advertisement to broadcast when the button is pressed. Fill in only the fields the target device checks; empty fields are left out of the packet.",
+          "data": {
+            "name": "Name",
+            "manufacturer_id": "Manufacturer ID",
+            "payload": "Manufacturer data",
+            "local_name": "Local name",
+            "service_uuids": "Service UUIDs",
+            "appearance": "Appearance",
+            "advertisement_type": "Advertisement type",
+            "duration": "Duration",
+            "adapter": "Adapter"
+          },
+          "data_description": {
+            "name": "Name of the button, e.g. Projector power on.",
+            "manufacturer_id": "Company ID, decimal (70) or hex (0x0046). The Advertisement Monitor shows it in decimal.",
+            "payload": "Manufacturer data as hex, without the company ID; BlueZ adds that itself.",
+            "local_name": "Advertised device name.",
+            "service_uuids": "16-bit (1812) or 128-bit UUIDs.",
+            "appearance": "GAP appearance value, e.g. 961 for a keyboard.",
+            "advertisement_type": "Peripheral is connectable; broadcast is not.",
+            "duration": "How long to keep advertising after each press.",
+            "adapter": "Integration default uses the adapter chosen in the integration options. You can also type hci0 or a MAC address."
+          },
+          "sections": {
+            "advanced": {
+              "name": "Advanced",
+              "description": "Rarely needed fields. Older BlueZ versions ignore TX power, intervals and raw data unless bluetoothd runs with --experimental.",
+              "data": {
+                "service_data": "Service data",
+                "solicit_uuids": "Solicit UUIDs",
+                "include_tx_power": "Include TX power",
+                "tx_power": "Requested TX power",
+                "discoverable": "Discoverable",
+                "min_interval": "Minimum interval",
+                "max_interval": "Maximum interval",
+                "data": "Raw AD structures"
+              },
+              "data_description": {
+                "service_data": "One uuid=hex per line, e.g. fe95=3020bc03.",
+                "include_tx_power": "Add a TX power level field to the packet.",
+                "tx_power": "Transmit power to request from the controller.",
+                "discoverable": "Set the LE General Discoverable flag.",
+                "data": "One type=hex per line, e.g. 0x16=0d18ff."
+              }
+            }
+          }
+        },
+        "reconfigure": {
+          "title": "Edit signal",
+          "description": "Define an advertisement to broadcast when the button is pressed. Fill in only the fields the target device checks; empty fields are left out of the packet.",
+          "data": {
+            "name": "Name",
+            "manufacturer_id": "Manufacturer ID",
+            "payload": "Manufacturer data",
+            "local_name": "Local name",
+            "service_uuids": "Service UUIDs",
+            "appearance": "Appearance",
+            "advertisement_type": "Advertisement type",
+            "duration": "Duration",
+            "adapter": "Adapter"
+          },
+          "data_description": {
+            "name": "Name of the button, e.g. Projector power on.",
+            "manufacturer_id": "Company ID, decimal (70) or hex (0x0046). The Advertisement Monitor shows it in decimal.",
+            "payload": "Manufacturer data as hex, without the company ID; BlueZ adds that itself.",
+            "local_name": "Advertised device name.",
+            "service_uuids": "16-bit (1812) or 128-bit UUIDs.",
+            "appearance": "GAP appearance value, e.g. 961 for a keyboard.",
+            "advertisement_type": "Peripheral is connectable; broadcast is not.",
+            "duration": "How long to keep advertising after each press.",
+            "adapter": "Integration default uses the adapter chosen in the integration options. You can also type hci0 or a MAC address."
+          },
+          "sections": {
+            "advanced": {
+              "name": "Advanced",
+              "description": "Rarely needed fields. Older BlueZ versions ignore TX power, intervals and raw data unless bluetoothd runs with --experimental.",
+              "data": {
+                "service_data": "Service data",
+                "solicit_uuids": "Solicit UUIDs",
+                "include_tx_power": "Include TX power",
+                "tx_power": "Requested TX power",
+                "discoverable": "Discoverable",
+                "min_interval": "Minimum interval",
+                "max_interval": "Maximum interval",
+                "data": "Raw AD structures"
+              },
+              "data_description": {
+                "service_data": "One uuid=hex per line, e.g. fe95=3020bc03.",
+                "include_tx_power": "Add a TX power level field to the packet.",
+                "tx_power": "Transmit power to request from the controller.",
+                "discoverable": "Set the LE General Discoverable flag.",
+                "data": "One type=hex per line, e.g. 0x16=0d18ff."
+              }
+            }
+          }
+        }
+      },
+      "error": {
+        "invalid_manufacturer_id": "Enter a company ID from 0 to 65535, decimal (70) or 0x-prefixed hex (0x0046).",
+        "invalid_hex": "Enter hex bytes, e.g. 0a1b2c or 0a:1b:2c.",
+        "invalid_uuid": "Enter 16-bit (1812) or 128-bit Bluetooth UUIDs.",
+        "invalid_number": "Enter a whole number in range.",
+        "invalid_service_data": "Service data must be one uuid=hex per line.",
+        "invalid_solicit_uuids": "Solicit UUIDs must be 16-bit (1812) or 128-bit Bluetooth UUIDs.",
+        "invalid_data": "Raw AD structures must be one type=hex per line, with type from 0 to 255.",
+        "invalid_interval": "The minimum interval can't be greater than the maximum interval.",
+        "manufacturer_data_incomplete": "Manufacturer ID and manufacturer data must be set together.",
+        "invalid_monitor_json": "That doesn't look like an advertisement copied from the Advertisement Monitor.",
+        "invalid_raw": "The raw advertising data is malformed.",
+        "multiple_manufacturers": "This advertisement has manufacturer data for several company IDs ({ids}); only one is supported per signal. Enter the fields manually instead.",
+        "empty_advertisement": "The advertisement has no fields that can be replayed."
+      },
+      "abort": {
+        "reconfigure_successful": "Signal updated."
+      }
+    }
+  },
+  "selector": {
+    "adapter": {
+      "options": {
+        "auto": "Automatic",
+        "default": "Integration default"
+      }
+    },
+    "advertisement_type": {
+      "options": {
+        "peripheral": "Peripheral",
+        "broadcast": "Broadcast"
+      }
+    }
+  },
+  "services": {
+    "send": {
+      "name": "Send advertisement",
+      "description": "Broadcasts a BLE advertisement for a few seconds. Returns once BlueZ has accepted it; the advertisement stays on air in the background.",
+      "fields": {
+        "manufacturer_id": {
+          "name": "Manufacturer ID",
+          "description": "Company ID, decimal (70) or 0x-prefixed hex (0x0046). Requires manufacturer data."
+        },
+        "payload": {
+          "name": "Manufacturer data",
+          "description": "Hex bytes after the company ID. Don't include the ID; BlueZ adds it."
+        },
+        "local_name": {
+          "name": "Local name",
+          "description": "Advertised device name."
+        },
+        "service_uuids": {
+          "name": "Service UUIDs",
+          "description": "16-bit (1812) or 128-bit service UUIDs."
+        },
+        "appearance": {
+          "name": "Appearance",
+          "description": "GAP appearance value, e.g. 961 for a keyboard."
+        },
+        "advertisement_type": {
+          "name": "Advertisement type",
+          "description": "Peripheral is connectable; broadcast is not."
+        },
+        "duration": {
+          "name": "Duration",
+          "description": "How long to keep advertising, 1 to 10 seconds."
+        },
+        "adapter": {
+          "name": "Adapter",
+          "description": "hci0, a MAC address or a BlueZ path. Defaults to the integration's adapter."
+        },
+        "service_data": {
+          "name": "Service data",
+          "description": "Mapping of service UUID to hex bytes."
+        },
+        "solicit_uuids": {
+          "name": "Solicit UUIDs",
+          "description": "Service UUIDs to solicit."
+        },
+        "include_tx_power": {
+          "name": "Include TX power",
+          "description": "Add a TX power level field to the packet."
+        },
+        "tx_power": {
+          "name": "Requested TX power",
+          "description": "Transmit power to request from the controller."
+        },
+        "discoverable": {
+          "name": "Discoverable",
+          "description": "Set the LE General Discoverable flag."
+        },
+        "min_interval": {
+          "name": "Minimum interval",
+          "description": "Minimum advertising interval."
+        },
+        "max_interval": {
+          "name": "Maximum interval",
+          "description": "Maximum advertising interval."
+        },
+        "data": {
+          "name": "Raw AD structures",
+          "description": "Mapping of AD type (0-255) to hex bytes."
+        }
+      },
+      "sections": {
+        "advanced_options": {
+          "name": "Advanced options"
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "not_loaded": {
+      "message": "Bluetooth Energy Transmitter is not set up or not loaded."
+    },
+    "invalid_advertisement": {
+      "message": "Invalid advertisement: {error}"
+    },
+    "dbus_unavailable": {
+      "message": "Can't reach the system D-Bus: {error}"
+    },
+    "bluez_unavailable": {
+      "message": "BlueZ isn't available on the system D-Bus: {error}"
+    },
+    "no_adapter": {
+      "message": "No Bluetooth adapter that supports BLE advertising was found."
+    },
+    "adapter_not_found": {
+      "message": "Bluetooth adapter {adapter} wasn't found. Advertising-capable adapters: {available}."
+    },
+    "adapter_no_advertising": {
+      "message": "Bluetooth adapter {adapter} doesn't support BLE advertising."
+    },
+    "adapter_not_powered": {
+      "message": "Bluetooth adapter {adapter} is powered off."
+    },
+    "no_free_instance": {
+      "message": "Bluetooth adapter {adapter} has no free advertising slot ({active} of {supported} in use)."
+    },
+    "advertisement_too_long": {
+      "message": "The advertisement is too long for {adapter} (about {length} bytes; limit {limit}). Remove fields or shorten the local name."
+    },
+    "advertisement_rejected": {
+      "message": "BlueZ rejected the advertisement on {adapter}: {error}"
+    },
+    "adapter_removed": {
+      "message": "Bluetooth adapter {adapter} disappeared while registering the advertisement."
+    },
+    "registration_failed": {
+      "message": "Couldn't register the advertisement on {adapter}: {error}"
+    },
+    "broadcaster_closed": {
+      "message": "Bluetooth Energy Transmitter is shutting down."
+    }
+  }
+}
