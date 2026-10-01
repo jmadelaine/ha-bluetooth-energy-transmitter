@@ -12,7 +12,14 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .bluez import Broadcaster, BroadcastError
-from .const import ADAPTER_AUTO, CONF_ADAPTER, DOMAIN
+from .const import (
+    ADAPTER_AUTO,
+    CONF_ADAPTER,
+    CONF_PAUSE_SCANNING,
+    DEFAULT_PAUSE_SCANNING,
+    DOMAIN,
+)
+from .scan_pause import ScanPauser
 from .services import async_setup_services
 
 _LOGGER = logging.getLogger(__name__)
@@ -34,7 +41,14 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: BluetoothEnergyTransmitterConfigEntry
 ) -> bool:
     """Check BlueZ is reachable, then set up a button per saved signal."""
-    broadcaster = Broadcaster(entry.options.get(CONF_ADAPTER, ADAPTER_AUTO))
+    broadcaster = Broadcaster(
+        entry.options.get(CONF_ADAPTER, ADAPTER_AUTO),
+        scan_pause=(
+            ScanPauser(hass).async_pause
+            if entry.options.get(CONF_PAUSE_SCANNING, DEFAULT_PAUSE_SCANNING)
+            else None
+        ),
+    )
     try:
         adapters = await broadcaster.async_get_adapters()
     except BroadcastError as err:

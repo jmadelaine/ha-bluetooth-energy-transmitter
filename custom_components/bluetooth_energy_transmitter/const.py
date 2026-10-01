@@ -14,6 +14,10 @@ CONF_ADAPTER: Final = "adapter"
 ADAPTER_AUTO: Final = "auto"
 ADAPTER_DEFAULT: Final = "default"
 
+# Pause Home Assistant's Bluetooth scanning on the adapter while broadcasting.
+CONF_PAUSE_SCANNING: Final = "pause_scanning"
+DEFAULT_PAUSE_SCANNING: Final = True
+
 # Advertisement fields, shared by the send action and saved signals.
 CONF_ADVERTISEMENT_TYPE: Final = "advertisement_type"
 CONF_MANUFACTURER_ID: Final = "manufacturer_id"

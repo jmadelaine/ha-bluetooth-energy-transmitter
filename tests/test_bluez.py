@@ -8,6 +8,7 @@ import pytest
 from .conftest import ADAPTER_ADDRESS, ADAPTER_PATH, FakeBlueZ, adapter_objects
 from custom_components.bluetooth_energy_transmitter.advertisement import Advertisement
 from custom_components.bluetooth_energy_transmitter.bluez import (
+    MAX_RESTARTS,
     Broadcaster,
     BroadcastError,
     advertisement_properties,
@@ -220,14 +221,60 @@ async def test_close_stops_early_and_unregisters(
     assert err.value.translation_key == "broadcaster_closed"
 
 
-async def test_release_by_bluez_skips_unregister(
-    bluez: FakeBlueZ, broadcaster: Broadcaster
+async def test_dropped_advertisement_goes_back_on_air(
+    bluez: FakeBlueZ, broadcaster: Broadcaster, caplog: pytest.LogCaptureFixture
 ) -> None:
     await broadcaster.async_broadcast(XGIMI, 10)
     [interface] = bluez.buses[-1].exported.values()
     interface.release()
-    await _until(lambda: not broadcaster.active_count)
+
+    await _until(lambda: len(bluez.registrations) == 2)
+    assert "BlueZ dropped the advertisement" in caplog.text
+    assert broadcaster.active_count == 1
+    # BlueZ already removed the released one, so it isn't unregistered.
     assert not bluez.unregistrations
+
+
+async def test_lost_bus_reconnects_and_goes_back_on_air(
+    bluez: FakeBlueZ, broadcaster: Broadcaster, caplog: pytest.LogCaptureFixture
+) -> None:
+    await broadcaster.async_broadcast(XGIMI, 10)
+    first_bus = bluez.buses[-1]
+    first_bus.disconnect()
+
+    await _until(lambda: len(bluez.registrations) == 2)
+    assert "Lost the D-Bus connection" in caplog.text
+    assert bluez.buses[-1] is not first_bus
+    assert bluez.buses[-1].connected
+
+
+async def test_restarts_stop_when_time_is_up(
+    bluez: FakeBlueZ, broadcaster: Broadcaster
+) -> None:
+    await broadcaster.async_broadcast(XGIMI, 0.05)
+    await _until(lambda: not broadcaster.active_count)
+    assert len(bluez.registrations) == 1
+    assert len(bluez.unregistrations) == 1
+
+
+async def test_restarts_are_capped(
+    bluez: FakeBlueZ, broadcaster: Broadcaster, caplog: pytest.LogCaptureFixture
+) -> None:
+    """An advertisement BlueZ keeps dropping is retried a bounded number of times."""
+    await broadcaster.async_broadcast(XGIMI, 30)
+    for _ in range(MAX_RESTARTS + 1):
+        await _until(lambda: bluez.buses[-1].exported)
+        [interface] = bluez.buses[-1].exported.values()
+        count = len(bluez.registrations)
+        interface.release()
+        await _until(
+            lambda count=count: (
+                len(bluez.registrations) > count or not broadcaster.active_count
+            )
+        )
+    await _until(lambda: not broadcaster.active_count)
+    assert len(bluez.registrations) == MAX_RESTARTS + 1
+    assert "gave up after" in caplog.text
 
 
 async def test_cancelled_caller_does_not_cancel_broadcast(

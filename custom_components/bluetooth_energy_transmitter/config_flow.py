@@ -57,12 +57,14 @@ from .const import (
     CONF_MANUFACTURER_ID,
     CONF_MAX_INTERVAL,
     CONF_MIN_INTERVAL,
+    CONF_PAUSE_SCANNING,
     CONF_PAYLOAD,
     CONF_SERVICE_DATA,
     CONF_SERVICE_UUIDS,
     CONF_SOLICIT_UUIDS,
     CONF_TX_POWER,
     DEFAULT_DURATION,
+    DEFAULT_PAUSE_SCANNING,
     DOMAIN,
     MAX_DURATION,
     MAX_INTERVAL_MS,
@@ -137,7 +139,10 @@ class BluetoothEnergyTransmitterConfigFlow(ConfigFlow, domain=DOMAIN):
                 {
                     vol.Required(CONF_ADAPTER, default=ADAPTER_AUTO): _adapter_selector(
                         adapters, ADAPTER_AUTO, None
-                    )
+                    ),
+                    vol.Required(
+                        CONF_PAUSE_SCANNING, default=DEFAULT_PAUSE_SCANNING
+                    ): BooleanSelector(),
                 }
             ),
         )
@@ -174,7 +179,13 @@ class BluetoothEnergyTransmitterOptionsFlow(OptionsFlow):
                 {
                     vol.Required(CONF_ADAPTER, default=current): _adapter_selector(
                         adapters, ADAPTER_AUTO, current
-                    )
+                    ),
+                    vol.Required(
+                        CONF_PAUSE_SCANNING,
+                        default=self.config_entry.options.get(
+                            CONF_PAUSE_SCANNING, DEFAULT_PAUSE_SCANNING
+                        ),
+                    ): BooleanSelector(),
                 }
             ),
         )

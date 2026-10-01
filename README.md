@@ -39,6 +39,7 @@ Copy `custom_components/bluetooth_energy_transmitter` into your Home Assistant `
 
 1. Go to **Settings → Devices & services → Add integration** and choose **Bluetooth Energy Transmitter**.
 2. Pick a default adapter, or leave it on **Automatic** to use the first powered adapter with a free advertising slot.
+   Leave **Pause Bluetooth scanning while broadcasting** on unless you need Bluetooth devices to keep updating during a broadcast. A Bluetooth radio can't transmit and receive at the same time; while Home Assistant scans, the adapter skips many advertising slots, and a device listening in standby may miss the signal.
 3. On the Bluetooth Energy Transmitter integration page, select **Add signal** for each advertisement you want as a button. See [Adding a signal](#adding-a-signal).
 
 To change a signal later, open its menu (⋮) on the integration page and select **Reconfigure**. To change the default adapter, select **Configure**.
@@ -148,6 +149,7 @@ On the integration page, select **Enable debug logging**. The log then shows:
 | "Bluetooth adapter … is powered off" | Check the adapter under **Settings → Devices & services → Bluetooth**. |
 | "The advertisement is too long" | Remove fields or shorten the payload. |
 | Log warns about extended advertising | The advertising data is over 31 bytes, so BlueZ switched to Bluetooth 5 extended advertising. Bluetooth 4.x receivers can't see it. Remove fields until it fits. |
+| The device only reacts if you press the button several times | Make sure **Pause Bluetooth scanning while broadcasting** is on (**Configure** on the integration page), and that the signal's interval is fast (the default, 20–30 ms). |
 | The device doesn't react | Compare with the remote in the Advertisement Monitor: manufacturer ID, payload, name, UUIDs and appearance must match. Try a longer duration. The device may also need a connection or a rolling code, in which case replay won't work. |
 
 ## Thanks

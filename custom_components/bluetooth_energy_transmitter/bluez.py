@@ -21,7 +21,7 @@ See THIRD_PARTY_NOTICES.md.
 
 import asyncio
 from collections.abc import Callable
-from contextlib import suppress
+from contextlib import AbstractAsyncContextManager, AsyncExitStack, suppress
 from dataclasses import dataclass, field
 import logging
 from typing import Any
@@ -60,6 +60,13 @@ BLUEZ_ERROR_INVALID_LENGTH = "org.bluez.Error.InvalidLength"
 BLUEZ_ERROR_DOES_NOT_EXIST = "org.bluez.Error.DoesNotExist"
 
 BusFactory = Callable[[], MessageBus]
+# Pauses other use of the radio (scanning) on the adapter with this address.
+ScanPause = Callable[[str | None], AbstractAsyncContextManager[None]]
+
+# Re-register an advertisement that stopped early after this many seconds,
+# at most this many times per broadcast.
+RESTART_DELAY = 0.1
+MAX_RESTARTS = 20
 
 
 class BroadcastError(HomeAssistantError):
@@ -430,10 +437,12 @@ class Broadcaster:
         self,
         default_adapter: str = ADAPTER_AUTO,
         bus_factory: BusFactory | None = None,
+        scan_pause: ScanPause | None = None,
     ) -> None:
         """Initialize with the adapter used when a request names none."""
         self.default_adapter = default_adapter
         self._bus_factory = bus_factory or _default_bus_factory
+        self._scan_pause = scan_pause
         self._closing = asyncio.Event()
         self._active: dict[tuple[Advertisement, str], _ActiveBroadcast] = {}
 
@@ -524,6 +533,11 @@ class Broadcaster:
         requested: str,
         registered: asyncio.Future[BluezAdapter],
     ) -> None:
+        """Keep the advertisement on air for `duration` seconds.
+
+        If BlueZ drops it or the bus connection goes away before the time is
+        up, it is registered again, on a new connection if needed.
+        """
         _LOGGER.debug(
             "Broadcasting for %ss (adapter=%s, ~%s bytes advertising data): %s",
             duration,
@@ -531,20 +545,76 @@ class Broadcaster:
             advertisement.estimated_length,
             advertisement.describe(),
         )
+        async with AsyncExitStack() as stack:
+            await self._async_advertise_until_done(
+                advertisement, duration, requested, registered, stack
+            )
+
+    async def _async_advertise_until_done(
+        self,
+        advertisement: Advertisement,
+        duration: float,
+        requested: str,
+        registered: asyncio.Future[BluezAdapter],
+        stack: AsyncExitStack,
+    ) -> None:
+        loop = asyncio.get_running_loop()
+        deadline: float | None = None
+        restarts = 0
+        while True:
+            reason, deadline = await self._async_advertise_on_connection(
+                advertisement, duration, requested, registered, deadline, stack
+            )
+            remaining = deadline - loop.time()
+            if (
+                reason not in ("released", "disconnected")
+                or remaining <= RESTART_DELAY
+                or self._closing.is_set()
+            ):
+                break
+            if restarts >= MAX_RESTARTS:
+                _LOGGER.warning(
+                    "Advertisement kept stopping early; gave up after %s restarts",
+                    restarts,
+                )
+                break
+            restarts += 1
+            _LOGGER.warning(
+                "%s with %.1fs of the broadcast left; registering it again",
+                "BlueZ dropped the advertisement"
+                if reason == "released"
+                else "Lost the D-Bus connection",
+                remaining,
+            )
+            await asyncio.sleep(RESTART_DELAY)
+        _LOGGER.debug("Broadcast finished on %s (%s restart(s))", requested, restarts)
+
+    async def _async_advertise_on_connection(
+        self,
+        advertisement: Advertisement,
+        duration: float,
+        requested: str,
+        registered: asyncio.Future[BluezAdapter],
+        deadline: float | None,
+        stack: AsyncExitStack,
+    ) -> tuple[str, float]:
+        """Register once on a fresh connection and wait.
+
+        Returns why it stopped and the broadcast's deadline, which is set when
+        the advertisement is first registered.
+        """
+        loop = asyncio.get_running_loop()
         bus = await _async_connect(self._bus_factory)
         try:
-            adapters = await _async_get_adapters(bus)
-            adapter = _select_adapter(adapters, requested)
-            _LOGGER.debug("Selected adapter %s: %s", adapter.label, adapter.as_dict())
-            if advertisement.estimated_length > LEGACY_ADVERTISING_DATA_LENGTH:
-                _LOGGER.warning(
-                    "Advertisement is about %s bytes, over the %s-byte legacy limit; "
-                    "BlueZ will use extended advertising, which Bluetooth 4.x "
-                    "receivers can't see: %s",
-                    advertisement.estimated_length,
-                    LEGACY_ADVERTISING_DATA_LENGTH,
-                    advertisement.describe(),
+            adapter = _select_adapter(await _async_get_adapters(bus), requested)
+            if deadline is None:
+                _LOGGER.debug(
+                    "Selected adapter %s: %s", adapter.label, adapter.as_dict()
                 )
+                self._warn_if_too_long(advertisement)
+                if self._scan_pause is not None:
+                    # Held until the whole broadcast, restarts included, ends.
+                    await stack.enter_async_context(self._scan_pause(adapter.address))
 
             released = asyncio.Event()
             interface = build_advertisement_interface(advertisement, released)
@@ -552,9 +622,14 @@ class Broadcaster:
             bus.export(path, interface)
             try:
                 await self._async_register(bus, adapter, path, advertisement)
-                registered.set_result(adapter)
+                if deadline is None:
+                    deadline = loop.time() + duration
+                    registered.set_result(adapter)
                 try:
-                    await self._async_wait(bus, duration, released)
+                    reason = await self._async_wait(
+                        bus, deadline - loop.time(), released
+                    )
+                    return reason, deadline
                 finally:
                     if bus.connected and not released.is_set():
                         await self._async_unregister(bus, adapter, path)
@@ -563,7 +638,18 @@ class Broadcaster:
                     bus.unexport(path, interface)
         finally:
             bus.disconnect()
-            _LOGGER.debug("Broadcast finished on %s", requested)
+
+    @staticmethod
+    def _warn_if_too_long(advertisement: Advertisement) -> None:
+        if advertisement.estimated_length > LEGACY_ADVERTISING_DATA_LENGTH:
+            _LOGGER.warning(
+                "Advertisement is about %s bytes, over the %s-byte legacy limit; "
+                "BlueZ will use extended advertising, which Bluetooth 4.x "
+                "receivers can't see: %s",
+                advertisement.estimated_length,
+                LEGACY_ADVERTISING_DATA_LENGTH,
+                advertisement.describe(),
+            )
 
     async def _async_register(
         self,
@@ -591,7 +677,7 @@ class Broadcaster:
 
     async def _async_wait(
         self, bus: MessageBus, duration: float, released: asyncio.Event
-    ) -> None:
+    ) -> str:
         """Wait for the duration, shutdown, BlueZ releasing it, or bus loss."""
         waiters = {
             asyncio.create_task(asyncio.sleep(duration)): "duration",
@@ -608,14 +694,7 @@ class Broadcaster:
         reason = waiters[next(iter(done))]
         if reason == "closing":
             _LOGGER.debug("Stopping advertisement early: integration unloading")
-        elif reason == "released":
-            _LOGGER.warning(
-                "BlueZ released the advertisement before %ss elapsed "
-                "(adapter powered off or removed?)",
-                duration,
-            )
-        elif reason == "disconnected":
-            _LOGGER.warning("Lost the D-Bus connection while advertising")
+        return reason
 
     async def _async_unregister(
         self, bus: MessageBus, adapter: BluezAdapter, path: str

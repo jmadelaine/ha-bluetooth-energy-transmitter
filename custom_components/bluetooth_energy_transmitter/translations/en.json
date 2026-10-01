@@ -4,10 +4,12 @@
       "user": {
         "description": "Broadcast BLE advertisements from this host's Bluetooth adapter. After setup, add a signal for each advertisement you want as a button.",
         "data": {
-          "adapter": "Default adapter"
+          "adapter": "Default adapter",
+          "pause_scanning": "Pause Bluetooth scanning while broadcasting"
         },
         "data_description": {
-          "adapter": "Adapter used when a signal or action doesn't name one. Automatic picks the first powered adapter with a free advertising slot."
+          "adapter": "Adapter used when a signal or action doesn't name one. Automatic picks the first powered adapter with a free advertising slot.",
+          "pause_scanning": "Stops Home Assistant's Bluetooth scanning on the adapter for the few seconds a signal is on air, so the radio isn't busy listening while it should be transmitting. Bluetooth devices handled by this adapter don't update during that time."
         }
       }
     },
@@ -21,10 +23,12 @@
     "step": {
       "init": {
         "data": {
-          "adapter": "Default adapter"
+          "adapter": "Default adapter",
+          "pause_scanning": "Pause Bluetooth scanning while broadcasting"
         },
         "data_description": {
-          "adapter": "Adapter used when a signal or action doesn't name one. Automatic picks the first powered adapter with a free advertising slot."
+          "adapter": "Adapter used when a signal or action doesn't name one. Automatic picks the first powered adapter with a free advertising slot.",
+          "pause_scanning": "Stops Home Assistant's Bluetooth scanning on the adapter for the few seconds a signal is on air, so the radio isn't busy listening while it should be transmitting. Bluetooth devices handled by this adapter don't update during that time."
         }
       }
     }

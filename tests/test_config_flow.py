@@ -55,11 +55,11 @@ async def test_user_flow(hass: HomeAssistant, bluez: FakeBlueZ) -> None:
     assert [option["value"] for option in options] == ["auto", ADAPTER_ADDRESS]
 
     result = await hass.config_entries.flow.async_configure(
-        result["flow_id"], {"adapter": ADAPTER_ADDRESS}
+        result["flow_id"], {"adapter": ADAPTER_ADDRESS, "pause_scanning": True}
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     assert result["title"] == "Bluetooth Energy Transmitter"
-    assert result["options"] == {"adapter": ADAPTER_ADDRESS}
+    assert result["options"] == {"adapter": ADAPTER_ADDRESS, "pause_scanning": True}
 
 
 async def test_user_flow_without_adapters(
@@ -89,11 +89,11 @@ async def test_options_flow(hass: HomeAssistant, bluez: FakeBlueZ) -> None:
 
     result = await hass.config_entries.options.async_init(entry.entry_id)
     result = await hass.config_entries.options.async_configure(
-        result["flow_id"], {"adapter": "hci0"}
+        result["flow_id"], {"adapter": "hci0", "pause_scanning": False}
     )
     assert result["type"] is FlowResultType.CREATE_ENTRY
     await hass.async_block_till_done()
-    assert entry.options == {"adapter": "hci0"}
+    assert entry.options == {"adapter": "hci0", "pause_scanning": False}
     assert entry.runtime_data.default_adapter == "hci0"
 
 
