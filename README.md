@@ -118,7 +118,7 @@ If an identical advertisement is already on air on the same adapter, a new reque
 | `include_tx_power` | Add a TX power level field to the packet. |
 | `tx_power` | Transmit power to request from the controller, −127 to 20 dBm.¹ |
 | `discoverable` | Set the LE General Discoverable flag. |
-| `min_interval`, `max_interval` | Advertising interval in ms, 20–10240.¹ |
+| `min_interval`, `max_interval` | Advertising interval in ms, 20–10240. Default 20–30 ms, so a short replay sends a few hundred packets; the Linux kernel's own default is 1.28 s, which can be too slow for a device in standby to notice.¹ |
 | `data` | Mapping of AD type (0–255) to hex for raw AD structures.¹ |
 
 ¹ Current BlueZ supports these directly. Older releases only honor them, and `tx_power`, when `bluetoothd` runs with `--experimental`, and otherwise ignore them without an error.

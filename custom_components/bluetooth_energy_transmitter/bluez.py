@@ -35,7 +35,14 @@ from dbus_fast.service import ServiceInterface, dbus_property, method
 from homeassistant.exceptions import HomeAssistantError
 
 from .advertisement import Advertisement
-from .const import ADAPTER_AUTO, ADAPTER_DEFAULT, DOMAIN, LEGACY_ADVERTISING_DATA_LENGTH
+from .const import (
+    ADAPTER_AUTO,
+    ADAPTER_DEFAULT,
+    DEFAULT_MAX_INTERVAL_MS,
+    DEFAULT_MIN_INTERVAL_MS,
+    DOMAIN,
+    LEGACY_ADVERTISING_DATA_LENGTH,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -260,10 +267,16 @@ def advertisement_properties(
         props["Discoverable"] = ("b", True)
     # Older BlueZ releases only honor MinInterval, MaxInterval, TxPower and
     # Data when bluetoothd runs with --experimental; otherwise they're ignored.
-    if adv.min_interval is not None:
-        props["MinInterval"] = ("u", adv.min_interval)
-    if adv.max_interval is not None:
-        props["MaxInterval"] = ("u", adv.max_interval)
+    min_interval = adv.min_interval
+    if min_interval is None:
+        min_interval = min(
+            DEFAULT_MIN_INTERVAL_MS, adv.max_interval or DEFAULT_MIN_INTERVAL_MS
+        )
+    max_interval = adv.max_interval
+    if max_interval is None:
+        max_interval = max(DEFAULT_MAX_INTERVAL_MS, min_interval)
+    props["MinInterval"] = ("u", min_interval)
+    props["MaxInterval"] = ("u", max_interval)
     if adv.data:
         props["Data"] = (
             "a{yv}",

@@ -48,6 +48,11 @@ MAX_TX_POWER: Final = 20
 # BlueZ MinInterval/MaxInterval are in milliseconds; the controller accepts
 # 0x0020-0x4000 units of 0.625 ms.
 MIN_INTERVAL_MS: Final = 20
+# Used when a signal sets no interval. The kernel's own default is 1.28 s,
+# which leaves only a few packets in a short replay; real remotes advertise
+# much faster, and a device in standby may only scan in short windows.
+DEFAULT_MIN_INTERVAL_MS: Final = 20
+DEFAULT_MAX_INTERVAL_MS: Final = 30
 MAX_INTERVAL_MS: Final = 10240
 
 # Legacy (Bluetooth 4.x) advertising PDUs carry at most 31 bytes of data.

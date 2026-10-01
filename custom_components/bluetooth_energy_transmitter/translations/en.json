@@ -98,7 +98,9 @@
                 "include_tx_power": "Add a TX power level field to the packet.",
                 "tx_power": "Transmit power to request from the controller.",
                 "discoverable": "Set the LE General Discoverable flag.",
-                "data": "One type=hex per line, e.g. 0x16=0d18ff."
+                "data": "One type=hex per line, e.g. 0x16=0d18ff.",
+                "min_interval": "Shortest time between packets. Empty uses 20 ms.",
+                "max_interval": "Longest time between packets. Empty uses 30 ms."
               }
             }
           }
@@ -147,7 +149,9 @@
                 "include_tx_power": "Add a TX power level field to the packet.",
                 "tx_power": "Transmit power to request from the controller.",
                 "discoverable": "Set the LE General Discoverable flag.",
-                "data": "One type=hex per line, e.g. 0x16=0d18ff."
+                "data": "One type=hex per line, e.g. 0x16=0d18ff.",
+                "min_interval": "Shortest time between packets. Empty uses 20 ms.",
+                "max_interval": "Longest time between packets. Empty uses 30 ms."
               }
             }
           }
@@ -246,11 +250,11 @@
         },
         "min_interval": {
           "name": "Minimum interval",
-          "description": "Minimum advertising interval."
+          "description": "Shortest time between packets. Default 20 ms."
         },
         "max_interval": {
           "name": "Maximum interval",
-          "description": "Maximum advertising interval."
+          "description": "Longest time between packets. Default 30 ms."
         },
         "data": {
           "name": "Raw AD structures",

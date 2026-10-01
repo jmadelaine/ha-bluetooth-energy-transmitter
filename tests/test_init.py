@@ -97,6 +97,8 @@ async def test_send_action(
     assert properties == {
         "Type": ("s", "broadcast"),
         "ManufacturerData": ("a{qv}", {0x4C: b"\x02\x15"}),
+        "MinInterval": ("u", 20),
+        "MaxInterval": ("u", 30),
     }
     await hass.config_entries.async_unload(entry.entry_id)
 

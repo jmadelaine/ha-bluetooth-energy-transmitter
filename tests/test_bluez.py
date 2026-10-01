@@ -10,6 +10,7 @@ from custom_components.bluetooth_energy_transmitter.advertisement import Adverti
 from custom_components.bluetooth_energy_transmitter.bluez import (
     Broadcaster,
     BroadcastError,
+    advertisement_properties,
 )
 
 HID_UUID = "00001812-0000-1000-8000-00805f9b34fb"
@@ -55,6 +56,9 @@ async def test_broadcast_registers_only_set_fields(
         # The company ID is a key; BlueZ adds it to the packet itself.
         "ManufacturerData": ("a{qv}", {0x46: b"\xaa\xbb\xcc"}),
         "Appearance": ("q", 961),
+        # Fast default interval, so a short replay sends plenty of packets.
+        "MinInterval": ("u", 20),
+        "MaxInterval": ("u", 30),
     }
 
     # Still on air after the call returns, then unregistered and cleaned up.
@@ -250,3 +254,17 @@ async def test_warns_when_over_legacy_length(
     caplog.clear()
     await broadcaster.async_broadcast(XGIMI, 0.01)
     assert "extended advertising" not in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("config", "expected"),
+    [
+        ({}, (20, 30)),
+        ({"min_interval": 100}, (100, 100)),
+        ({"max_interval": 25}, (20, 25)),
+        ({"min_interval": 50, "max_interval": 60}, (50, 60)),
+    ],
+)
+def test_interval_defaults(config: dict, expected: tuple[int, int]) -> None:
+    properties = advertisement_properties(Advertisement.from_config(config))
+    assert (properties["MinInterval"][1], properties["MaxInterval"][1]) == expected
